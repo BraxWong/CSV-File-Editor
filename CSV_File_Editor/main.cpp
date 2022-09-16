@@ -3,13 +3,43 @@
 #include <cmath>
 #include <string>
 #include <limits>
+#include <bits/stdc++.h>
 using namespace std;
 //File class, it contains two public method: dataEntry() and readFile()
 class File {
     public:
         void dataEntry();
         void readFile();
+        void editFile();
+        void totalSpent();
 };
+
+void File::editFile() {
+    //Save the file as string
+    string save,fileName,line,newString;
+    int count = 0;
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(),'\n');
+    cout << "Please enter the name of the file you would like to read(Add .csv at the end)\n";
+    getline(cin,fileName);
+    ifstream object;
+    object.open(fileName);
+    while(object.good()){
+        getline(object,save,'\n');
+        line+=save;
+    }
+    object.close();
+    ofstream object;
+    object.open(fileName);
+    stringstream newLine(line);
+    while(getline(newLine,newString,',')){
+        if(count == 3){
+            object << endl;
+        }
+        object << newString << ",";
+        count++;
+    }
+}
 //readFile() reads the file and prints out everything that is in it
 void File::readFile() {
     //Clears out previous user inputs
@@ -23,7 +53,7 @@ void File::readFile() {
     ifstream object;
     object.open(fileName);
     //object.good() returns true when there is still data within the file specified
-    while(object.good()){
+    while(!object.good()){
         string line;
         //getting the line and parse it into line
         getline(object,line,',');
@@ -91,7 +121,7 @@ int main() {
     int num;
     cout << "Welcome to CSV File Editor (Version 1.0.0) Brax's Prduction.\n";
     while(true){
-        cout << "Menu:\nPress 1: Create a new file\nPress 2: Read a file\nPress 3: Files Editting\n";
+        cout << "Menu:\nPress 1: Create a new file\nPress 2: Read a file\nPress 3: Edit a file\nPress 4: Exit\n";
         cin >> num;
         File file;
         if(num == 1){
@@ -99,6 +129,12 @@ int main() {
         }
         else if(num == 2){
             file.readFile();
+        }
+        else if(num ==3) {
+            file.editFile();
+        }
+        else if(num == 4){
+            break;
         }
         else {
             cout << "Its either 1 or 2.\n";
