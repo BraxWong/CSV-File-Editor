@@ -8,16 +8,29 @@ using namespace std;
 //File class, it contains two public method: dataEntry() and readFile()
 class File {
     public:
-        void dataEntry();
-        void readFile(string fileName);
-        void editFile(string fileName);
-        void totalSpent(string fileName);
+        void dataEntry(bool newFile);
+        void readFile();
+        void editFile();
+        void totalSpent();
+        bool validFile();
+        string fileName;
+        File(string name) {fileName = name;}
 };
 
-void File::totalSpent(string fileName) {
+bool File::validFile() 
+{
+    ifstream object;
+    object.open(File::fileName);
+    if(object){
+        return true;
+    }
+    return false;
+}
+void File::totalSpent() {
     ifstream object;
     int count = 0, total = 0;
-    object.open(fileName);
+    char seeTransactions;
+    object.open(File::fileName);
     while(object.good()){
         string line;
         if(count >= 5){
@@ -41,17 +54,20 @@ void File::totalSpent(string fileName) {
         getline(object,line,',');
         ++count;
     }
-    cout <<"$" << total << endl;
-    readFile(fileName);
+    cout <<"$" << total << endl << "Would you like to know what you have spent money on this month?(Y/N)\n";
+    cin >> seeTransactions; 
+    if(seeTransactions == 'Y' || seeTransactions == 'y'){
+        readFile();
+    }
 }
-void File::editFile(string fileName) {
+void File::editFile() {
     cin.clear();
     cin.ignore(numeric_limits<streamsize>::max(),'\n');
     //Save the file as string
     string save,line,newString;
     int count = 0;
     ifstream object;
-    object.open(fileName);
+    object.open(File::fileName);
     while(object.good()){
         getline(object,save,'\n');
         line+=save;
@@ -61,7 +77,7 @@ void File::editFile(string fileName) {
 
     //Create a new file
     ofstream something;
-    something.open(fileName);
+    something.open(File::fileName);
     stringstream newLine(line);
     while(getline(newLine,newString,',')){
         if(count == 3){
@@ -94,10 +110,10 @@ void File::editFile(string fileName) {
     something.close();
 }
 //readFile() reads the file and prints out everything that is in it
-void File::readFile(string fileName) {
+void File::readFile() {
     //Creating an ifstream object to read the file
     ifstream object;
-    object.open(fileName);
+    object.open(File::fileName);
     //object.good() returns true when there is still data within the file specified
     while(object.good()){
         string line;
@@ -111,18 +127,22 @@ void File::readFile(string fileName) {
 }
 
 //dataEntry() creates a file and allows users to add data into it
-void File::dataEntry() {
+void File::dataEntry(bool newFile) {
     //Clear out user inputs
     cin.clear();
     cin.ignore(numeric_limits<streamsize>::max(),'\n');
-    string fileName;
-    //Ask for file name
-    cout << "Please enter the name of the file you would like to create(Add .csv at the end)\n";
-    getline(cin,fileName);
-    //Creating an ofstream object to store the filename
     ofstream object;
-    object.open(fileName);
-    string header, cell;
+    string f;
+    if(newFile){
+        cout << "Please provide the name of the new file.\n";
+        getline(cin,f);
+        object.open(f);
+    }
+    else {
+    //Creating an ofstream object to store the filename
+      object.open(File::fileName);
+    }
+      string header, cell;
     //While loop for header items
     while(true){
         //Ask for header text
@@ -167,23 +187,40 @@ void File::dataEntry() {
 int main() {
     int num;
     string fileName;
+    File* file;
+    char createNewFile;
     cout << "Welcome to CSV File Editor (Version 1.0.0) Brax's Prduction.\nPlease enter the name of the file that you would like to access.\n";
-    getline(cin,fileName);
+    while(true){
+      getline(cin,fileName);
+      file = new File(fileName);
+          if(!file->validFile()){
+              cout << "The file cannot be found! Would you like to create this file (" << fileName << ") (Y/N)\n";
+              cin >> createNewFile;
+              if(createNewFile == 'Y' || createNewFile == 'y'){
+                  file->dataEntry(false);
+                  break;
+              }
+          }
+          else {
+              cout << "File Found.\n";
+              break;
+          }
+    }
+
     while(true){
         cout << "Menu:\nPress 1: Create a new file\nPress 2: Read a file\nPress 3: Edit a file\nPress 4: Total Spent\nPress 5: Exit\n";
         cin >> num;
-        File file;
         if(num == 1){
-            file.dataEntry();
+            file->dataEntry(true);
         }
         else if(num == 2){
-            file.readFile(fileName);
+            file->readFile();
         }
         else if(num ==3) {
-            file.editFile(fileName);
+            file->editFile();
         }
         else if(num == 4){
-            file.totalSpent(fileName);
+            file->totalSpent();
         }
         else if(num == 5){
             break;
